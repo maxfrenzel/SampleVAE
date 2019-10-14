@@ -158,13 +158,13 @@ def main():
     coord = tf.train.Coordinator()
 
     with tf.name_scope('create_inputs'):
-        reader = DataReader(param['dataset_file'], param, audio_param, args.params, coord, args.logdir,
+        reader = DataReader(param['dataset_file'], param, audio_param, f'{args.logdir}/params.json', coord, args.logdir,
                             featdir=args.featdir)
         spec_batch = reader.dequeue_feature(args.batch_size)
         truth_batch = reader.dequeue_truth(args.batch_size)
 
-        batcher_test = Batcher(param['dataset_test_file'], param, audio_param, args.params, args.logdir,
-                               featdir=args.featdir)
+        batcher_test = Batcher(param['dataset_test_file'], param, audio_param, f'{args.logdir}/params.json',
+                               args.logdir, featdir=args.featdir)
 
     num_test_data = batcher_test.num_data
     test_batches_full = int(batcher_test.num_data / args.batch_size_test)

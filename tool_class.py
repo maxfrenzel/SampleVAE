@@ -179,8 +179,8 @@ class SoundSampleTool(object):
                 emb = self.embed_audio(in_file)
                 embeddings.append(emb)
 
-            # If no weights are given, assume equal weighting, otherwise normalise weights
-            if len(weights) == 0:
+            # If wrong number of weights is given, assume equal weighting, otherwise normalise weights
+            if len(weights) != len(audio_files):
                 w_list = [1.0/len(audio_files)]*len(audio_files)
             else:
                 w_list = [x / sum(weights) for x in weights]
