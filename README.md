@@ -68,3 +68,18 @@ tool.generate(out_file='generated.wav', audio_files=['/Users/Shared/Maschine 2 L
 ```
 
 Additionally the `variance` parameter (default: 0) can be used to add some Gaussian noise before decoding, to add random variation to the samples.
+
+### Finding similar samples
+Assuming the tool was initialised with a `library_dir`, we can look for similar samples in the library.
+
+```
+tool.find_similar(target_file, num_similar=10)
+```
+
+will look for the 10 most similar samples to the sample in the audio file `target_file`. Currently the results are simply printed on screen.
+
+### Note on sample length and audio segmentation
+Currently, the tool/models treat all samples as 2 second long clips. Shorter files get padded, longer files crop.
+
+For the purpose of building the library, an additional parameter, `library_segmentation`, can be set to `True` when initialising the tool. If `False`, files in the library are simply considered as their first 2 second. However, if `True`, the segments within longer files are considered as individual samples for the purpose of the library and similarity search.
+Note that while this is implemented and technically working, the segmentation currently seems too sensitive.
