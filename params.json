@@ -1,0 +1,53 @@
+{
+    "audio":
+    {
+        "dataset_file": "NI_train.pkl",
+        "dataset_test_file": "NI_valid.pkl",
+        "N_FFT": 1024,
+        "HOP_LENGTH": 256,
+        "SAMPLING_RATE": 16000,
+        "MELSPEC_BANDS": 128,
+        "USE_SPEC": true,
+        "USE_DELTA": false,
+        "USE_DELTADELTA": false,
+        "USE_MFCC": false,
+        "N_MFCC": 18,
+        "USE_MFCC_DELTA": false,
+        "USE_MFCC_DELTADELTA": false,
+        "USE_FLUCT": false,
+        "MASK_FLUCT": false,
+        "SPECTRAL_CONTRACTION": false,
+        "SC_THRESHOLD": 0.1,
+        "USE_SC": false,
+        "SPECTRAL_FLATNESS": false,
+        "SF_THRESHOLD": 0.6,
+        "USE_SF": false,
+        "USE_HPSS": false
+    },
+    "model":
+    {
+        "sample_sec": 2,
+        "sample_overlap": 0,
+        "offset_initial": 0,
+        "offset_final": 0,
+        "single_slice_audio": true,
+        "dim_latent": 64,
+        "dim_latent_cat": [],
+        "cells_hidden": 512,
+        "cells_hidden_cat": [],
+        "conv_channels": [32, 64, 32, 32],
+        "max_pooling": [[4, 4], [2, 2], [2, 4], [2, 2]],
+        "deconv_shape": [[1, 15, 14, 32],
+                        [1, 31, 31, 64],
+                        [1, 63, 62, 32],
+                        [1, 128, 125, 1]],
+        "iaf_flow_length": 5,
+        "dim_autoregressive_nl": 64,
+        "initial_s_offset": 1.0,
+        "predictor_units": [],
+        "dropout_keep_prob": 0.75,
+        "rnn_decoder": false,
+        "rnn_highway": false,
+        "feature_normalization": false
+    }
+}
