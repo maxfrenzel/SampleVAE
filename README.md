@@ -51,3 +51,20 @@ Once completely initialised, the tool can be used for sample generation and simi
 Note: Currently, only one tool can be generated due to Tensorflow's graph naming conventions. To create a new tool, you have to restart your python environment.
 
 ### Generating samples
+To generate new samples, use the `generate` function.
+
+To sample a random point in latent space, decode it, and store the audio to `generated.wav`, run
+
+```
+tool.generate(out_file='generated.wav')
+```
+
+To encode one or multiple files, pass the filenames as a list of strings to the `audio_files` parameter. If the parameter `weights` is not specified, the resulting embeddings will be averaged over before decoding into a single audio file. Alternatively, a list of numbers can be passed to `weights` to set the respective weights of each input sample in the average. Note that in the current version, the weights get normalised and negative weights might lead to undesired results or crashes. Might want to change that in the future to allow for more interesting vector arithmetic with the embeddings.
+
+E.g. the following code combines an example kick and snare, with a 1:2 ratio:
+
+```
+tool.generate(out_file='generated.wav', audio_files=['/Users/Shared/Maschine 2 Library/Samples/Drums/Kick/Kick Accent 1.wav','/Users/Shared/Decoded Forms Library/Samples/Drums/Snare/Snare Anodyne 3.wav'], weigths=[1,2])
+```
+
+Additionally the `variance` parameter (default: 0) can be used to add some Gaussian noise before decoding, to add random variation to the samples.
