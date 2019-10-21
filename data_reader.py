@@ -198,12 +198,14 @@ def randomize_data(data_list):
         index = random.randint(0, (len(data_list) - 1))
         yield data_list[index]
 
+
 def load_norm(norm_file):
     norm_dict = joblib.load(norm_file)
     mean = norm_dict['mean']
     norm = norm_dict['norm']
 
     return mean, norm
+
 
 def return_data(data_list, feature_path, logdir, pad_length=None, normalize=False, randomize=True):
 
@@ -298,7 +300,7 @@ class DataReader(object):
 
         print("Feature length: ", self.length)
 
-        # TODO: Dimensions can't be hardcoded here.
+        # TODO: Dimensions shouldn't be hardcoded here.
         self.feature_placeholder = tf.placeholder(dtype=tf.float32, shape=None)
         self.feature_queue = tf.PaddingFIFOQueue(queue_size,
                                          ['float32'],
@@ -455,6 +457,7 @@ class Batcher(object):
         truth_batch = np.concatenate(truth_list, axis=0)
 
         return feature_batch, truth_batch
+
 
 def load_dataset_file(filename='dataset.pkl'):
 

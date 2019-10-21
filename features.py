@@ -29,7 +29,7 @@ def get_features(audio_paths,
                  track_id=None,
                  param=param_default,
                  source_sr=None,
-                 pass_zero=True,
+                 pass_zero=False,
                  offset=0.0):
 
     feature_list = []
@@ -62,27 +62,16 @@ def get_features(audio_paths,
         #     offset = param['offset']
 
         # Load track
-        # TODO: Quick hack to make compatible with GPU, fix properly
         try:
             y, _ = librosa.load(audio_path, sr=param['SAMPLING_RATE'], duration=duration, offset=offset)
         except:
-            try:
-                audio_path = audio_path.replace('/Users/maxfrenzel/Dropbox (Personal)/AI_DJ_Selection/',
-                                                '/home/max/Data/AI_DJ/')
-                y, _ = librosa.load(audio_path, sr=param['SAMPLING_RATE'], duration=duration, offset=offset)
-            except:
-                try:
-                    audio_path = audio_path.replace('/Volumes/G-DRIVE ev RaW/Datasets/',
-                                                    '/media/max/G-DRIVE ev RaW/Datasets/')
-                    y, _ = librosa.load(audio_path, sr=param['SAMPLING_RATE'], duration=duration, offset=offset)
-                except:
-                    # TODO: This is another quick hack and not ideal for many reasons (e.g. fixed feature size)...
-                    if pass_zero:
-                        print(f'Cannot load audio file {audio_path}. Passing empty features instead')
-                        return np.zeros((128, 10000))
-                    else:
-                        print(f'Cannot load audio file {audio_path}.')
-                        raise
+            # TODO: This is another quick hack and not ideal for many reasons (e.g. fixed feature size)...
+            if pass_zero:
+                print(f'Cannot load audio file {audio_path}. Passing empty features instead')
+                return np.zeros((128, 10000))
+            else:
+                print(f'Cannot load audio file {audio_path}.')
+                raise
 
     # Calculate spectrum
     y_stft_full = get_spectrum(y, param['N_FFT'], param['HOP_LENGTH'])
@@ -156,6 +145,7 @@ def get_spectrum(y, n_fft, hop_length, sr=None):
 
     return y_stft
 
+
 def get_melspec(spec, n_mels):
 
     # Power spectrum
@@ -167,12 +157,14 @@ def get_melspec(spec, n_mels):
 
     return S
 
+
 def get_mfcc(melspec,
              n_mfcc):
 
     mfcc = librosa.feature.mfcc(S=melspec, n_mfcc=n_mfcc)
 
     return mfcc
+
 
 def get_fluctogram(spec, sr, n_fft,
                    n_bands=11,
@@ -251,6 +243,7 @@ def get_fluctogram(spec, sr, n_fft,
 
     return fluctogram, spec_contract, spec_flat
 
+
 def mask_fluctogram(fluct, spec_contrac, spec_flat, param):
 
     if param['SPECTRAL_CONTRACTION']:
@@ -260,11 +253,13 @@ def mask_fluctogram(fluct, spec_contrac, spec_flat, param):
 
     return fluct
 
+
 def visualize_fluct(fluct):
 
     n_bands = fluct.shape[0]
     for cur_band in np.arange(n_bands):
         plt.plot(fluct[cur_band, :] + (cur_band + 1) * 3, 'k')
+
 
 def stft_interp(spec, source_freqs, target_freqs):
     """Compute an interpolated version of the spectrogram. Uses scipy.interp1d to map
@@ -275,6 +270,7 @@ def stft_interp(spec, source_freqs, target_freqs):
     spec_interp = set_interp(target_freqs)
 
     return spec_interp
+
 
 def spectral_contraction(X_mag):
     """Spectral Contraction measure.
@@ -304,6 +300,7 @@ def spectral_contraction(X_mag):
     spectral_contraction = np.sum(np.square(X_mag) * window, axis=0) / (np.sum(np.square(X_mag), axis=0) + np.finfo(float).eps)
 
     return spectral_contraction
+
 
 # def bandwise_contraction(X_log, freq_ax_log, f_start=164, f_end=10548, n_bands=17, bandwith=240, bands_offset=30):
 def bandwise_contraction(X_log, target_freqs,

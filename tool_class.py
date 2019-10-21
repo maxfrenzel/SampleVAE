@@ -149,9 +149,9 @@ class SoundSampleTool(object):
             features_pad = np.zeros((features.shape[0], pad_length))
             features_pad[:, :features.shape[1]] = features
             features = features_pad
-        # TODO: This shouldn't be neccesary at all, but sometimemes get one value too many... Must be a bug in features
+        # TODO: This shouldn't be necessary at all, but sometimes get one value too many. Must be a bug in features.py..
         elif features.shape[1] > pad_length:
-            features = features[:,:pad_length]
+            features = features[:, :pad_length]
         specs_in = np.expand_dims(np.expand_dims(features, axis=0), axis=3)
 
         emb = self.embed(specs_in)[0]
