@@ -31,6 +31,9 @@ Alternatively one can manually the training at any point.
 
 When resuming a previously aborted model training, the dataset does not have to be specified, the script will automatically use the same dataset (and other audio and model parameters).
 
+### Test model
+A fully trained model on a very small dataset (mostly drum samples) is provided with the name `model_test`. You can use this to skip the steps of creating your dataset and training on it, and test the tool itself straight away.
+
 ## Running the sound sample tool with a trained model
 To use the sample tool, start a python environment and run
 
