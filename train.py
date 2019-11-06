@@ -146,6 +146,9 @@ def main():
         with open(f'{args.logdir}/params.json', 'w') as fp:
             json.dump(param_dict, fp, indent=2)
 
+        # Reload to make sure everything stays consistent
+        param, audio_param, model_param = get_params(f'{args.logdir}/params.json')
+
     # Set correct batch size in deconvolution shapes
     deconv_shape = param['deconv_shape']
     for k, s in enumerate(deconv_shape):
