@@ -29,7 +29,7 @@ def get_features(audio_paths,
                  track_id=None,
                  param=param_default,
                  source_sr=None,
-                 pass_zero=False,
+                 pass_random=True,
                  offset=0.0):
 
     feature_list = []
@@ -66,9 +66,9 @@ def get_features(audio_paths,
             y, _ = librosa.load(audio_path, sr=param['SAMPLING_RATE'], duration=duration, offset=offset)
         except:
             # TODO: This is another quick hack and not ideal for many reasons (e.g. fixed feature size)...
-            if pass_zero:
-                print(f'Cannot load audio file {audio_path}. Passing empty features instead')
-                return np.zeros((128, 10000))
+            if pass_random:
+                print(f'Cannot load audio file {audio_path}. Passing random features instead')
+                return np.random.random((128, 126))
             else:
                 print(f'Cannot load audio file {audio_path}.')
                 raise

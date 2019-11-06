@@ -93,8 +93,8 @@ def main():
     # Train/valid split
     split_index = int(args.train_ratio * len(track_ids))
 
-    for k in range(1000):
-        random.shuffle(track_ids)
+    # Randomize data
+    random.shuffle(track_ids)
 
     track_ids_train = track_ids[:split_index]
     track_ids_valid = track_ids[split_index:]
