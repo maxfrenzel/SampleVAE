@@ -2,6 +2,9 @@ import sys
 import joblib
 import time
 
+# import matplotlib.pyplot as plt
+# import librosa.display
+
 from data_reader import *
 from model_iaf import *
 from features import *
@@ -163,6 +166,7 @@ class SoundSampleTool(object):
                  out_file='generated.wav',
                  audio_files=[],
                  weights=[],
+                 normalize_weights=True,
                  variance=0.0):
 
         # Process input files
@@ -182,8 +186,10 @@ class SoundSampleTool(object):
             # If wrong number of weights is given, assume equal weighting, otherwise normalise weights
             if len(weights) != len(audio_files):
                 w_list = [1.0/len(audio_files)]*len(audio_files)
-            else:
+            elif normalize_weights == True:
                 w_list = [x / sum(weights) for x in weights]
+            else:
+                w_list = weights
 
             # Weight embeddings
             embeddings = [w_list[k] * embeddings[k] for k in range(len(embeddings))]
@@ -274,7 +280,11 @@ class SoundSampleTool(object):
                 # Only do if sample is longer than sample_sec
                 if librosa.core.get_duration(y=x, sr=self.param['SAMPLING_RATE']) > self.param['sample_sec']:
 
-                    onset_frames = librosa.onset.onset_detect(x,
+                    onset_envelope = librosa.onset.onset_strength(x,
+                                                                  sr=self.param['SAMPLING_RATE'],
+                                                                  hop_length=self.param['HOP_LENGTH'])
+
+                    onset_frames = librosa.onset.onset_detect(onset_envelope=onset_envelope,
                                                               sr=self.param['SAMPLING_RATE'],
                                                               hop_length=self.param['HOP_LENGTH'],
                                                               backtrack=True)
@@ -288,6 +298,18 @@ class SoundSampleTool(object):
                         onset_times = [0.0]
                     elif onset_times[0] < 0.5:
                         onset_times[0] = 0.0
+
+                    # if len(onset_times) > 1:
+                    #     D = np.abs(librosa.stft(x))
+                    #     plt.figure()
+                    #     ax1 = plt.subplot(2, 1, 1)
+                    #     librosa.display.specshow(librosa.amplitude_to_db(D, ref=np.max), x_axis='time', y_axis='log')
+                    #     times = librosa.times_like(onset_envelope, sr=self.param['SAMPLING_RATE'])
+                    #     plt.title('Power spectrogram')
+                    #     plt.subplot(2, 1, 2, sharex=ax1)
+                    #     plt.plot(times, onset_envelope, label='Onset strength')
+                    #     plt.vlines(times[onset_frames], 0, onset_envelope.max(), color='r', alpha=0.9, linestyle='--',
+                    #                label='Onsets')
 
                 else:
                     onset_times = [0.0]
