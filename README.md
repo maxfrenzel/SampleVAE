@@ -1,5 +1,5 @@
 # Sound Sample Tool
-Deep learning-based tool that allows for various types of new sample generation, as well as searching for similar samples in an existing sample library. The deep learning part is implemented in TensorFlow and consists mainly of a Variational Autoencoder (VAE) with Inverse Autoregressive Flows (IAF).
+Deep learning-based tool that allows for various types of new sample generation, as well as sound classification, and searching for similar samples in an existing sample library. The deep learning part is implemented in TensorFlow and consists mainly of a Variational Autoencoder (VAE) with Inverse Autoregressive Flows (IAF) and an optional classifier network on top of the VAE's encoder's hidden state.
 
 ## Making a dataset for training
 Use the `make_dataset.py` script to generate a new dataset for trainig. The main parameters are `data_dir` and `dataset_name`. The former is a directory (or multiple directories) in which to look for samples (files ending in .wav, .aiff, or .mp3; only need to specify root directory, the script looks into all sub directories). The latter should a unique name for this dataset.
@@ -9,7 +9,12 @@ For example, to search for files in the directories `/Users/Shared/Decoded Forms
   python make_dataset.py --data_dir '/Users/Shared/Decoded Forms Library/Samples' '/Users/Shared/Maschine 2 Library' --dataset_name NativeInstruments
 ```
 
-By default, the data is split randomly into 90% train and 10% validation data.
+By default, the data is split randomly into 90% train and 10% validation data. The optional `train_ratio` parameter (defaults to 0.9) can be used to specify a different split.
+
+### Creating a dataset that includes class information
+To add a classifier to the model, use `make_dataset_classifier.py` instead. This script works essentially in the same way as `make_dataset.py`, but it treats the immediate sub-directories in `data_dir` as class names, and assumes all samples within them belong to that resepective class.
+
+Currently only simple multiclass classification is supported. There is also no weighting of the classes happening so you should make sure that classes are as balanced as possible. Also, the current version does the train/validation split randomly; making sure the split happens evenly across classes is a simple future improvement.
 
 ## Training a model
 To train a model, use the `train.py` script. The main parameters of interest are `logdir` and `dataset`.
