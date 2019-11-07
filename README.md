@@ -67,13 +67,13 @@ To sample a random point in latent space, decode it, and store the audio to `gen
 tool.generate(out_file='generated.wav')
 ```
 
-To encode one or multiple files, pass the filenames as a list of strings to the `audio_files` parameter. If the parameter `weights` is not specified, the resulting embeddings will be averaged over before decoding into a single audio file. Alternatively, a list of numbers can be passed to `weights` to set the respective weights of each input sample in the average. Note that in the current version, the weights get normalised and negative weights might lead to undesired results or crashes. Might want to change that in the future to allow for more interesting vector arithmetic with the embeddings.
-
-E.g. the following code combines an example kick and snare, with a 1:2 ratio:
+To encode one or multiple files, pass the filenames as a list of strings to the `audio_files` parameter. If the parameter `weights` is not specified, the resulting embeddings will be averaged over before decoding into a single audio file. Alternatively, a list of numbers can be passed to `weights` to set the respective weights of each input sample in the average. By default, the weights get normalised. E.g. the following code combines an example kick and snare, with a 1:2 ratio:
 
 ```
 tool.generate(out_file='generated.wav', audio_files=['/Users/Shared/Maschine 2 Library/Samples/Drums/Kick/Kick Accent 1.wav','/Users/Shared/Decoded Forms Library/Samples/Drums/Snare/Snare Anodyne 3.wav'], weigths=[1,2])
 ```
+
+Weight normalisation can be turned off by passing `normalize_weights=False`. This allows for arbitrary vector arithmetic with the embedding vectors, e.g. using a negative weight to subtract one vector from another.
 
 Additionally the `variance` parameter (default: 0) can be used to add some Gaussian noise before decoding, to add random variation to the samples.
 
@@ -81,10 +81,23 @@ Additionally the `variance` parameter (default: 0) can be used to add some Gauss
 Assuming the tool was initialised with a `library_dir`, we can look for similar samples in the library.
 
 ```
-tool.find_similar(target_file, num_similar=10)
+similar_files = tool.find_similar(target_file, num_similar=10)
 ```
 
-will look for the 10 most similar samples to the sample in the audio file `target_file`. Currently the results are simply printed on screen.
+will look for the 10 most similar samples to the sample in the audio file `target_file` and return them as a list, with `similar_files[0]` being the most similar, etc. By default, the results (and their respective distances in latent space) are also printed on screen.
+
+### Classifying samples
+Assuming the model was trained on a dataset with class data, we can use the tool to make class predictions for new samples.
+
+```
+probabilities, predicted_class = tool.predict(target_file)
+```
+
+will run the classifier on the provided audio file and return two items, the probability distribution over classes and the name of the most probable class.
+
+To full list of class names (in the same order as their respective probabilities) can be accessed via `tool.class_names`.
+
+The `offset` parameter (default: 0.0) can be used to not apply the classification to the first 2 seconds of the audio file, but a later slice of audio.
 
 ### Note on sample length and audio segmentation
 Currently, the tool/models treat all samples as 2 second long clips. Shorter files get padded, longer files crop.
