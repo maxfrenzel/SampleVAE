@@ -1,4 +1,4 @@
-# Sound Sample Tool
+# SampleVAE - A multi-purpose tool for sound design and music production
 Deep learning-based tool that allows for various types of new sample generation, as well as sound classification, and searching for similar samples in an existing sample library. The deep learning part is implemented in TensorFlow and consists mainly of a Variational Autoencoder (VAE) with Inverse Autoregressive Flows (IAF) and an optional classifier network on top of the VAE's encoder's hidden state.
 
 ## Making a dataset for training
