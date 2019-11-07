@@ -31,10 +31,12 @@ To train a model called `model_NI` on the above dataset, use
 
 On first training on a new dataset, all the features have to be calculated. This may take a while. When restarting the training later, or training a new model with same dataset and audio parameters, existing features are loaded.
 
-Training automatically stops when the model converges. If no improvement is found on the validation data for several stest steps, the learning rate is lowered. Once it goes below a threshold, training stops completely.
-Alternatively one can manually the training at any point.
+Training automatically stops when the model converges. If no improvement is found on the validation data for several test steps, the learning rate is lowered. Once it goes below a threshold, training stops completely.
+Alternatively one can manually stop the training at any point.
 
 When resuming a previously aborted model training, the dataset does not have to be specified, the script will automatically use the same dataset (and other audio and model parameters).
+
+If the dataset contains classification data, a confusion matrix is plotted and stored in `logdir` at every test step.
 
 ### Test model
 A fully trained model on a very small dataset (mostly drum samples) is provided with the name `model_test`. You can use this to skip the steps of creating your dataset and training on it, and test the tool itself straight away.
