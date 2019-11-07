@@ -230,12 +230,12 @@ class SoundSampleTool(object):
             # If wrong number of weights is given, assume equal weighting, otherwise normalise weights
             if len(weights) != len(audio_files):
                 w_list = [1.0/len(audio_files)]*len(audio_files)
-            elif sum(weights) == 0:
+            elif normalize_weights and sum(weights) == 0:
                 print('Weights normalisation turned on but weights sum to zero.')
                 print('Choose different weights or set normalize_weights=False.')
                 print('Using uniform normalised weights instead.')
                 w_list = [1.0 / len(audio_files)] * len(audio_files)
-            elif normalize_weights == True:
+            elif normalize_weights:
                 w_list = [x / sum(weights) for x in weights]
             else:
                 w_list = weights
