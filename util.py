@@ -136,7 +136,9 @@ def plot_confusion_matrix(cm, classes,
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
 
-    fig, ax = plt.subplots(figsize=(15, 12))
+    num_classes = len(classes)
+
+    fig, ax = plt.subplots(figsize=(num_classes+3, num_classes))
     im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
     ax.figure.colorbar(im, ax=ax)
     # We want to show all ticks...
@@ -146,7 +148,8 @@ def plot_confusion_matrix(cm, classes,
            xticklabels=classes, yticklabels=classes,
            title=title,
            ylabel='True label',
-           xlabel='Predicted label')
+           xlabel='Predicted label',
+           ylim=[num_classes-0.5, -0.5])
 
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
