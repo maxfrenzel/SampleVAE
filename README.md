@@ -38,8 +38,14 @@ When resuming a previously aborted model training, the dataset does not have to 
 
 If the dataset contains classification data, a confusion matrix is plotted and stored in `logdir` at every test step.
 
-### Test model
-A fully trained model on a very small dataset (mostly drum samples) is provided with the name `model_test`. You can use this to skip the steps of creating your dataset and training on it, and test the tool itself straight away.
+## Pre-trained Models
+Three trained models are provided:
+
+`model_general`: A model trained on slightly over 60k samples of all types. This is the same dataset that was used in my NeuralFunk project (https://towardsdatascience.com/neuralfunk-combining-deep-learning-with-sound-design-91935759d628). This model does not have a classifier.
+
+`model_drum_classes`: A model trained on roughly 10k drum sounds, with a classifier of 9 different drum classes (e.g. kick, snare, etc).
+
+`model_drum_machines`: A model trained on roughly 4k drum sounds, with a classifier of 71 different drum machine classes (e.g. Ace Tone Rhythm Ace, Akai XE8, Akai XR10 etc). Note that this is a tiny dataset with a very large number of classes, each only containing a handful of examples. This model is only included as an example of what's possible, not as a really useful model in itself.
 
 ## Running the sound sample tool with a trained model
 To use the sample tool, start a python environment and run
