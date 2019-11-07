@@ -13,7 +13,7 @@ def get_arguments():
         return {'true': True, 'false': False}[s.lower()]
 
     parser = argparse.ArgumentParser(description='Find all wav, aiff, and mp3 files and create dataset file.')
-    parser.add_argument('--data_dir', type=str, nargs='*',
+    parser.add_argument('--data_dir', type=str,
                         help='Root directory(s) in which to look for samples. Samples can be in nested directories.')
     parser.add_argument('--dataset_name', type=str,
                         help='Root directory in which to look for samples. Samples can be in nested directories.')
@@ -50,39 +50,54 @@ def get_data_subset(track_ids, full_data):
     return datasubset
 
 
+def get_subdirs(base_dir):
+    return [name for name in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, name))]
+
+
 def main():
     args = get_arguments()
 
-    # Get all paths of audio files
-    audio_files = []
+    # Find all subdirectories and use them as class-names
+    classes = get_subdirs(args.data_dir)
 
-    for root_dir in args.data_dir:
-        for dirName, subdirList, fileList in os.walk(root_dir, topdown=False):
+    # Get all paths of audio files
+    audio_files = [[] for c in classes]
+
+    # For each class, look through all sub-directories for audio files
+    for k, c in enumerate(classes):
+        for dirName, subdirList, fileList in os.walk(f'{args.data_dir}/{c}', topdown=False):
             for fname in fileList:
                 if os.path.splitext(fname)[1] in ['.wav', '.WAV',
                                                   '.aiff', '.AIFF',
                                                   '.mp3', '.MP3',
                                                   '.aac', '.AAC']:
-                    audio_files.append('%s/%s' % (dirName, fname))
+                    audio_files[k].append('%s/%s' % (dirName, fname))
 
-    print(f'Total number of samples found: {len(audio_files)}')
+    print(f'Total number of samples found: {sum([len(files) for files in audio_files])}')
 
     # Build dataset
     track_ids = []
     audio_paths = dict()
+    class_dict = dict()
 
-    for sample_path in audio_files:
-        # Find unique ID for each sample. Try filename first, if already exists add extension
-        track_id = os.path.splitext(os.path.basename(sample_path))[0]
-        while track_id in track_ids:
-            track_id += 'x'
+    for k, c in enumerate(classes):
+        for sample_path in audio_files[k]:
+            # Find unique ID for each sample. Try filename first, if already exists add extension
+            track_id = os.path.splitext(os.path.basename(sample_path))[0]
+            while track_id in track_ids:
+                track_id += 'x'
 
-        audio_paths[track_id] = sample_path
-        track_ids.append(track_id)
+            audio_paths[track_id] = sample_path
+            class_dict[track_id] = k
+            track_ids.append(track_id)
 
-    # TODO: Add proper support for category data later; for now just pass empty dicts for compatibility
-    categories = dict()
-    category_names = dict()
+    categories = {
+        'classes': class_dict
+    }
+
+    category_names = {
+        'classes': classes
+    }
 
     dataset = {
         'track_ids': track_ids,

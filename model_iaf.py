@@ -361,7 +361,7 @@ class VAEModel(object):
                                                          + self.variables['encoder_fc']['b_z0']),
                                          keep_prob=self.keep_prob)
 
-        # TODO: Properly take care of the case where some values might be -1 (not just here but throughout)
+        # TODO: Properly take care of semi-supervised case where some values might be -1 (not just here but throughout)
         if "cells_hidden_cat" in self.param.keys():
             mu_logvar_hidden_list = tf.split(mu_logvar_hidden, [self.cells_hidden] + self.param['cells_hidden_cat'], axis=1)
         else:

@@ -300,16 +300,15 @@ class DataReader(object):
 
         print("Feature length: ", self.length)
 
-        # TODO: Dimensions shouldn't be hardcoded here.
         self.feature_placeholder = tf.placeholder(dtype=tf.float32, shape=None)
         self.feature_queue = tf.PaddingFIFOQueue(queue_size,
-                                         ['float32'],
-                                         shapes=[((128, self.length, 1))])
+                                                 ['float32'],
+                                                 shapes=[((self.num_features, self.length, 1))])
         self.feature_enqueue = self.feature_queue.enqueue([self.feature_placeholder])
 
         self.truth_placeholder = tf.placeholder(dtype=tf.int32, shape=None)
         self.truth_queue = tf.PaddingFIFOQueue(queue_size, ['int32'],
-                                            shapes=[(self.num_categories, )])
+                                               shapes=[(self.num_categories,)])
         self.truth_enqueue = self.truth_queue.enqueue([self.truth_placeholder])
 
         # self.length_placeholder = tf.placeholder(dtype=tf.int32, shape=None)
