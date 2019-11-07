@@ -154,8 +154,7 @@ class SoundSampleTool(object):
 
         return emb
 
-    # Function that takes audio sample and returns their embedding
-    def embed_audio(self,
+    def get_features(self,
                     input_audio,
                     offset=0.0):
 
@@ -171,6 +170,16 @@ class SoundSampleTool(object):
             features = features[:, :pad_length]
         specs_in = np.expand_dims(np.expand_dims(features, axis=0), axis=3)
 
+        return specs_in
+
+
+    # Function that takes audio sample and returns their embedding
+    def embed_audio(self,
+                    input_audio,
+                    offset=0.0):
+
+        specs_in = self.get_features(input_audio, offset)
+
         emb = self.embed(specs_in)[0]
 
         return emb
@@ -184,23 +193,13 @@ class SoundSampleTool(object):
             print('Model has no classifier. Prediction is only available for models with classifiers.')
             return None
 
-        # Calculate features
-        features = get_features(input_audio, param=self.param, offset=offset)
-        # Add padding if too short
-        if features.shape[1] < pad_length:
-            features_pad = np.zeros((features.shape[0], pad_length))
-            features_pad[:, :features.shape[1]] = features
-            features = features_pad
-        # TODO: This shouldn't be necessary at all, but sometimes get one value too many. Must be a bug in features.py..
-        elif features.shape[1] > pad_length:
-            features = features[:, :pad_length]
-        input_batch = np.expand_dims(np.expand_dims(features, axis=0), axis=3)
+        input_batch = self.get_features(input_audio, offset)
 
         # Run computation
         probabilities = self.sess.run([self.prediction],
-                                   feed_dict={self.feature_placeholder: input_batch})[0][0]
+                                   feed_dict={self.feature_placeholder: input_batch})[0][0][0]
 
-        p_index = np.argmax(probabilities, axis=1)[0]
+        p_index = np.argmax(probabilities)
 
         predicted_class = self.class_names[p_index]
 
@@ -231,6 +230,11 @@ class SoundSampleTool(object):
             # If wrong number of weights is given, assume equal weighting, otherwise normalise weights
             if len(weights) != len(audio_files):
                 w_list = [1.0/len(audio_files)]*len(audio_files)
+            elif sum(weights) == 0:
+                print('Weights normalisation turned on but weights sum to zero.')
+                print('Choose different weights or set normalize_weights=False.')
+                print('Using uniform normalised weights instead.')
+                w_list = [1.0 / len(audio_files)] * len(audio_files)
             elif normalize_weights == True:
                 w_list = [x / sum(weights) for x in weights]
             else:
@@ -271,7 +275,8 @@ class SoundSampleTool(object):
     # Function that takes a sample as input, and returns closest samples in the library
     def find_similar(self,
                      target_file,
-                     num_similar=1):
+                     num_similar=1,
+                     display=True):
 
         if self.sample_library is None:
             print('No sample library built. Specify sample directory to create library.')
@@ -291,7 +296,13 @@ class SoundSampleTool(object):
         for k, key in enumerate(nn_keys):
             out_text += f'{k+1} - {self.sample_library["audio_paths"][key]} at {self.sample_library["onsets"][key]} (dist = {nn_distances[k]})\n'
 
-        print(out_text)
+        if display:
+            print(out_text)
+
+        # Make list of files and return
+        file_list = [self.sample_library["audio_paths"][key] for key in nn_keys]
+
+        return file_list
 
     def build_library(self):
 
