@@ -80,6 +80,18 @@ class SoundSampleTool(object):
         else:
             raise ValueError('No existing parameters found. Train a model first.')
 
+        # Check if a classifier was trained
+        self.num_categories = len(self.param['predictor_units'])
+        if self.num_categories > 0:
+            self.has_classifier = True
+            # Load class names
+            test_data = joblib.load(self.audio_param['dataset_test_file'])
+            self.class_names = test_data['category_names']['classes']
+            self.num_classes = [len(self.class_names)]
+        else:
+            self.has_classifier = False
+            self.num_classes = []
+
         # Set correct batch size in deconvolution shapes
         deconv_shape = self.param['deconv_shape']
         for k, s in enumerate(deconv_shape):
@@ -100,11 +112,13 @@ class SoundSampleTool(object):
         print('Creating model.')
         self.net = VAEModel(self.param,
                             self.batch_size,
+                            self.num_categories,
+                            self.num_classes,
                             keep_prob=1.0)
         print('Model created.')
 
         # Create embedding and reconstruction tensors.
-        self.embedding, _ = self.net.embed_and_predict(self.feature_placeholder)
+        self.embedding, self.prediction = self.net.embed_and_predict(self.feature_placeholder)
         # self.reconstruction, _ = self.net.decode(self.latent_placeholder)
 
         # Set up session
@@ -160,6 +174,37 @@ class SoundSampleTool(object):
         emb = self.embed(specs_in)[0]
 
         return emb
+
+    # Function that takes audio sample and returns class predictions
+    def predict(self,
+                input_audio,
+                offset=0.0):
+
+        if self.has_classifier == False:
+            print('Model has no classifier. Prediction is only available for models with classifiers.')
+            return None
+
+        # Calculate features
+        features = get_features(input_audio, param=self.param, offset=offset)
+        # Add padding if too short
+        if features.shape[1] < pad_length:
+            features_pad = np.zeros((features.shape[0], pad_length))
+            features_pad[:, :features.shape[1]] = features
+            features = features_pad
+        # TODO: This shouldn't be necessary at all, but sometimes get one value too many. Must be a bug in features.py..
+        elif features.shape[1] > pad_length:
+            features = features[:, :pad_length]
+        input_batch = np.expand_dims(np.expand_dims(features, axis=0), axis=3)
+
+        # Run computation
+        probabilities = self.sess.run([self.prediction],
+                                   feed_dict={self.feature_placeholder: input_batch})[0][0]
+
+        p_index = np.argmax(probabilities, axis=1)[0]
+
+        predicted_class = self.class_names[p_index]
+
+        return probabilities, predicted_class
 
     # Function that takes a list of files as input, and returns combined reconstruction
     def generate(self,

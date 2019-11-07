@@ -8,6 +8,7 @@ from random import shuffle
 import numpy as np
 import argparse
 import json
+import math
 
 from data_reader import *
 from model_iaf import *
@@ -23,7 +24,7 @@ batch_size_test = 64
 learning_rate = 1e-3
 learning_rate_min = 1e-5
 learning_rate_factor = 5.0
-learning_rate_steps = 3
+learning_rate_steps = 4
 beta = 1.0
 params = 'params.json'
 
@@ -124,11 +125,6 @@ def main():
         print(f'{args.logdir}/params.json')
         param, audio_param, _ = get_params(f'{args.logdir}/params.json')
 
-        if 'dropout_keep_prob' not in param.keys():
-            param['dropout_keep_prob'] = 1.0
-        if 'single_slice_audio' not in param.keys():
-            param['single_slice_audio'] = True
-
     # Otherwise load new one, change the dataset, and copy to logdir
     else:
         print('Starting with new parameters.')
@@ -138,6 +134,24 @@ def main():
         # Adjust dataset
         audio_param['dataset_file'] = f'datasets/{args.dataset}_train.pkl'
         audio_param['dataset_test_file'] = f'datasets/{args.dataset}_valid.pkl'
+
+        # Check if datasset contains class information
+        test_data = joblib.load(audio_param['dataset_test_file'])
+        num_categories = len(test_data['category_names'])
+        has_classifier = num_categories > 0
+        if has_classifier:
+            # This assumes that only a single classifier/category exists
+            num_classes = len(test_data['category_names']['classes'])
+
+            # Set predictor units if not manually set to correct class number; use two hidden layers
+            if len(model_param['predictor_units']) != 1:
+                predictor_units = []
+                # First layer largest power of two less than encoder hidden state
+                predictor_units.append(2 ** int(math.log(param['cells_hidden'] - 1, 2)))
+                # Second layer smallest power of two larger than encoder hidden state
+                predictor_units.append(2 ** int(math.log(num_classes, 2) + 1))
+                # Update value
+                model_param['predictor_units'] = [predictor_units]
 
         # Save parameter file
         param_dict = {"audio": audio_param,
@@ -370,18 +384,6 @@ def main():
 
                 test_loss_history.append(mean_test_loss)
 
-                # If no improvement over learning_rate_steps test steps, lower learning rate
-                if len(test_loss_history) >= args.learning_rate_steps:
-                    if test_loss_history[-args.learning_rate_steps] <= min(test_loss_history[-args.learning_rate_steps+1:]):
-                        learning_rate /= args.learning_rate_factor
-                        print(f'No improvement on validation data for {args.learning_rate_steps} test steps. \
-                        Decreasing learning rate by factor {args.learning_rate_factor}')
-
-                        # Check if training should be stopped
-                        if learning_rate <= learning_rate_min:
-                            print(f'Reached learning rate threshold of {args.learning_rate_min}. Stopping training.')
-                            break
-
                 # Plot confusion matrices
                 for c in range(batcher_test.num_categories):
                     util.plot_confusion_matrix(total_confusion_matrix[c],
@@ -407,9 +409,21 @@ def main():
             _summary.value.add(tag='learning_rate', simple_value=learning_rate)
             writer.add_summary(_summary, step)
 
+            # If no improvement over learning_rate_steps test steps, lower learning rate
+            if step % args.test_every == 0:
+                if len(test_loss_history) >= args.learning_rate_steps:
+                    if test_loss_history[-args.learning_rate_steps] < min(test_loss_history[-args.learning_rate_steps + 1:]):
+                        learning_rate /= args.learning_rate_factor
+                        print(f'No improvement on validation data for {args.learning_rate_steps} test steps. \
+                                                        Decreasing learning rate by factor {args.learning_rate_factor}')
+
+                        # Check if training should be stopped
+                        if learning_rate <= learning_rate_min:
+                            print(f'Reached learning rate threshold of {args.learning_rate_min}. Stopping training.')
+                            break
+
     except KeyboardInterrupt:
-        # Introduce a line break after ^C is displayed so save message
-        # is on its own line.
+        # Introduce a line break after ^C is displayed so save message is on its own line.
         print()
     finally:
         if step > last_saved_step:
