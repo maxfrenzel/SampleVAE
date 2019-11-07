@@ -344,14 +344,14 @@ class VAEModel(object):
 
         # Do encoder calculation
         encoder_hidden = input_batch
-        print('Encoder hidden state 0: ', encoder_hidden)
+        # print('Encoder hidden state 0: ', encoder_hidden)
         for l in range(self.layers_enc):
             # print(encoder_hidden)
             encoder_hidden = two_d_conv(encoder_hidden, self.variables['encoder_conv'][l]['filter'],
                                         self.param['max_pooling'][l])
             encoder_hidden = self.activation_conv(encoder_hidden)
 
-            print(f'Encoder hidden state {l}: ', encoder_hidden)
+            # print(f'Encoder hidden state {l}: ', encoder_hidden)
 
         encoder_hidden = tf.reshape(encoder_hidden, [-1, self.conv_out_units])
 
@@ -614,16 +614,16 @@ class VAEModel(object):
         with tf.name_scope(name):
 
             # Unpack category data and convert to one hot
-            print('Truth tensor:', input_truth)
+            # print('Truth tensor:', input_truth)
             truth_list = tf.unstack(input_truth, axis=1)
-            print('Truth list:', truth_list)
+            # print('Truth list:', truth_list)
             onehot_list = []
             for k, item in enumerate(truth_list):
                 onehot_list.append(tf.one_hot(item, depth=self.num_classes[k]))
 
             output, encoder_mu, encoder_logvar, encoder_std, epsilon, z, nf_sigma, y_prob_list, y_logprob_list = self._create_network(input_batch)
 
-            print("Output size: ", output)
+            # print("Output size: ", output)
 
             # If a real batch size is given, cut off padding
             if batch_size_real is not None:
@@ -659,8 +659,8 @@ class VAEModel(object):
 
             accuracy_list = []
 
-            print('One hot list:', onehot_list)
-            print('Log prob list:', y_logprob_list)
+            # print('One hot list:', onehot_list)
+            # print('Log prob list:', y_logprob_list)
 
             # Calculate loss and accuracy for each category
             for k in range(self.num_categories):

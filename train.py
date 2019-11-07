@@ -24,7 +24,7 @@ batch_size_test = 64
 learning_rate = 1e-3
 learning_rate_min = 1e-5
 learning_rate_factor = 5.0
-learning_rate_steps = 4
+learning_rate_steps = 5
 beta = 1.0
 params = 'params.json'
 
@@ -60,8 +60,10 @@ def get_arguments():
                         help='How many steps between test evaluation. Default: ' + str(test_every) + '.')
     parser.add_argument('--num_steps', type=int, default=num_steps,
                         help='Number of training steps. Default: ' + str(num_steps) + '.')
-    parser.add_argument('--learning_rate', type=float, default=learning_rate,
-                        help='Learning rate for training. Default: ' + str(learning_rate) + '.')
+    parser.add_argument('--learning_rate', type=float, default=None,
+                        help='Learning rate for training. If set, overrides automatic scheduling.')
+    parser.add_argument('--learning_rate_init', type=float, default=learning_rate,
+                        help='Initial learning rate for automatic decay. Default: ' + str(learning_rate) + '.')
     parser.add_argument('--learning_rate_min', type=float, default=learning_rate_min,
                         help='Minimum learning rate. Stop training once reached. Default: ' + str(learning_rate_min) + '.')
     parser.add_argument('--learning_rate_factor', type=float, default=learning_rate_factor,
@@ -206,7 +208,11 @@ def main():
     lr_placeholder = tf.placeholder_with_default(input=tf.to_float(args.learning_rate),
                                                  shape=(),
                                                  name="LearningRate")
-    learning_rate = args.learning_rate
+    # Set (initial) learning rate
+    if args.learning_rate is None:
+        learning_rate = args.learning_rate_init
+    else:
+        learning_rate = args.learning_rate
 
     class_labels = [[x for x in range(y)] for y in reader.num_classes]
 
@@ -409,8 +415,9 @@ def main():
             _summary.value.add(tag='learning_rate', simple_value=learning_rate)
             writer.add_summary(_summary, step)
 
-            # If no improvement over learning_rate_steps test steps, lower learning rate
-            if step % args.test_every == 0:
+            # If no improvement over learning_rate_steps test steps, lower learning rate;
+            # unless manually set learning rate
+            if (step % args.test_every == 0) and (args.learning_rate is None):
                 if len(test_loss_history) >= args.learning_rate_steps:
                     if test_loss_history[-args.learning_rate_steps] < min(test_loss_history[-args.learning_rate_steps + 1:]):
                         learning_rate /= args.learning_rate_factor
