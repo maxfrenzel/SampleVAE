@@ -301,8 +301,9 @@ class SoundSampleTool(object):
 
         # Make list of files and return
         file_list = [self.sample_library["audio_paths"][key] for key in nn_keys]
+        onsets = [self.sample_library["onsets"][key] for key in nn_keys]
 
-        return file_list
+        return file_list, onsets, nn_distances
 
     def build_library(self):
 
