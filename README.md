@@ -89,10 +89,10 @@ Additionally the `variance` parameter (default: 0) can be used to add some Gauss
 Assuming the tool was initialised with a `library_dir`, we can look for similar samples in the library.
 
 ```
-similar_files = tool.find_similar(target_file, num_similar=10)
+similar_files, onsets, distances = tool.find_similar(target_file, num_similar=10)
 ```
 
-will look for the 10 most similar samples to the sample in the audio file `target_file` and return them as a list, with `similar_files[0]` being the most similar, etc. By default, the results (and their respective distances in latent space) are also printed on screen.
+will look for the 10 most similar samples to the sample in the audio file `target_file` and return them as a list, with `similar_files[0]` being the most similar, etc. `onsets` contains the onset (in seconds) of where in the file the similar sample starts. And `distances` contains the Euclidean distances to the target file in embedding space. By default, the results are also printed on screen.
 
 ### Classifying samples
 Assuming the model was trained on a dataset with class data, we can use the tool to make class predictions for new samples.
