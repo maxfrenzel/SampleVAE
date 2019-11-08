@@ -93,6 +93,17 @@
     "dropout_keep_prob": 0.75,
     "rnn_decoder": false,
     "rnn_highway": false,
-    "feature_normalization": false
+    "feature_normalization": false,
+    "class_names": [
+      "0_kick",
+      "1_snare",
+      "2_hihat_closed",
+      "3_hihat_open",
+      "4_tom_low",
+      "5_tom_mid",
+      "6_tom_high",
+      "7_clap",
+      "8_rim"
+    ]
   }
 }

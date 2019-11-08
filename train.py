@@ -155,6 +155,9 @@ def main():
                 # Update value
                 model_param['predictor_units'] = [predictor_units]
 
+            # Store class names
+            model_param['class_names'] = test_data['category_names']['classes']
+
         # Save parameter file
         param_dict = {"audio": audio_param,
                       "model": model_param}

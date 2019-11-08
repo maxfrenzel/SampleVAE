@@ -86,7 +86,7 @@ class SoundSampleTool(object):
             self.has_classifier = True
             # Load class names
             test_data = joblib.load(self.audio_param['dataset_test_file'])
-            self.class_names = test_data['category_names']['classes']
+            self.class_names = self.param['class_names']
             self.num_classes = [len(self.class_names)]
         else:
             self.has_classifier = False
