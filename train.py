@@ -207,15 +207,16 @@ def main():
     # Placeholder for dropout
     keep_prob = tf.placeholder_with_default(input=tf.to_float(1.0), shape=(), name="KeepProbRec")
 
-    # Placeholder for learning rate and initial learning rate
-    lr_placeholder = tf.placeholder_with_default(input=tf.to_float(args.learning_rate),
-                                                 shape=(),
-                                                 name="LearningRate")
     # Set (initial) learning rate
     if args.learning_rate is None:
         learning_rate = args.learning_rate_init
     else:
         learning_rate = args.learning_rate
+
+    # Placeholder for learning rate and initial learning rate
+    lr_placeholder = tf.placeholder_with_default(input=tf.to_float(learning_rate),
+                                                 shape=(),
+                                                 name="LearningRate")
 
     class_labels = [[x for x in range(y)] for y in reader.num_classes]
 
