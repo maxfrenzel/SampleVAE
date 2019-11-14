@@ -1,5 +1,6 @@
 # SampleVAE - A multi-purpose tool for sound design and music production
 Deep learning-based tool that allows for various types of new sample generation, as well as sound classification, and searching for similar samples in an existing sample library. The deep learning part is implemented in TensorFlow and consists mainly of a Variational Autoencoder (VAE) with Inverse Autoregressive Flows (IAF) and an optional classifier network on top of the VAE's encoder's hidden state.
+A short article about the tool can be found here: https://towardsdatascience.com/samplevae-a-multi-purpose-ai-tool-for-music-producers-and-sound-designers-e966c7562f22?source=friends_link&sk=588d13c6080568aca63f98e4d3835c87
 
 ## Making a dataset for training
 Use the `make_dataset.py` script to generate a new dataset for trainig. The main parameters are `data_dir` and `dataset_name`. The former is a directory (or multiple directories) in which to look for samples (files ending in .wav, .aiff, or .mp3; only need to specify root directory, the script looks into all sub directories). The latter should a unique name for this dataset.
@@ -89,10 +90,10 @@ Additionally the `variance` parameter (default: 0) can be used to add some Gauss
 Assuming the tool was initialised with a `library_dir`, we can look for similar samples in the library.
 
 ```
-similar_files = tool.find_similar(target_file, num_similar=10)
+similar_files, onsets, distances = tool.find_similar(target_file, num_similar=10)
 ```
 
-will look for the 10 most similar samples to the sample in the audio file `target_file` and return them as a list, with `similar_files[0]` being the most similar, etc. By default, the results (and their respective distances in latent space) are also printed on screen.
+will look for the 10 most similar samples to the sample in the audio file `target_file` and return them as a list, with `similar_files[0]` being the most similar, etc. `onsets` contains the onset (in seconds) of where in the file the similar sample starts. And `distances` contains the Euclidean distances to the target file in embedding space. By default, the results are also printed on screen.
 
 ### Classifying samples
 Assuming the model was trained on a dataset with class data, we can use the tool to make class predictions for new samples.
