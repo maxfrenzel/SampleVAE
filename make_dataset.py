@@ -61,6 +61,7 @@ def main():
             for fname in fileList:
                 if os.path.splitext(fname)[1] in ['.wav', '.WAV',
                                                   '.aiff', '.AIFF',
+                                                  '.aif', '.AIF',
                                                   '.mp3', '.MP3',
                                                   '.aac', '.AAC']:
                     audio_files.append('%s/%s' % (dirName, fname))

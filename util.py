@@ -1,7 +1,10 @@
 import librosa
 import numpy as np
 import matplotlib as mpl
-mpl.use('TkAgg')
+try:
+    mpl.use('TkAgg')
+except ImportError as e:
+    pass
 import matplotlib.pyplot as plt
 import json
 

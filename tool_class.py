@@ -34,7 +34,7 @@ def n_nearest_neighbours(target, emb_dict, n=5, exclude=[]):
     return n_nn_keys, [distance_dict[t_id] for t_id in n_nn_keys]
 
 
-# Load model rom checkpoint
+# Load model from checkpoint
 def load(saver, sess, logdir):
     print("Trying to restore saved checkpoints from {} ...".format(logdir),
           end="")
