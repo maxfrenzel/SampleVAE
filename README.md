@@ -65,8 +65,6 @@ The parameter `library_dir` is optional and specifies a sample library root dire
 
 Once completely initialised, the tool can be used for sample generation and similarity search.
 
-Note: Currently, only one tool can be generated due to Tensorflow's graph naming conventions. To create a new tool, you have to restart your python environment.
-
 ### Generating samples
 To generate new samples, use the `generate` function.
 

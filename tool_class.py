@@ -99,49 +99,53 @@ class SoundSampleTool(object):
             deconv_shape[k] = actual_shape
         self.param['deconv_shape'] = deconv_shape
 
-        # Create placeholders
-        self.feature_placeholder = tf.placeholder_with_default(
-            input=tf.zeros([self.batch_size, num_features, pad_length, 1], dtype=tf.float32),
-            shape=[None, num_features, pad_length, 1])
-        # self.latent_placeholder = tf.placeholder_with_default(
-        #     input=tf.zeros([self.batch_size, self.param['dim_latent']], dtype=tf.float32),
-        #     shape=[self.batch_size, self.param['dim_latent']])
+        self.graph = tf.Graph()
 
-        # Create network.
-        print('Creating model.')
-        self.net = VAEModel(self.param,
-                            self.batch_size,
-                            self.num_categories,
-                            self.num_classes,
-                            keep_prob=1.0)
-        print('Model created.')
+        with self.graph.as_default():
 
-        # Create embedding and reconstruction tensors.
-        self.embedding, self.prediction = self.net.embed_and_predict(self.feature_placeholder)
-        # self.reconstruction, _ = self.net.decode(self.latent_placeholder)
+            # Create placeholders
+            self.feature_placeholder = tf.placeholder_with_default(
+                input=tf.zeros([self.batch_size, num_features, pad_length, 1], dtype=tf.float32),
+                shape=[None, num_features, pad_length, 1])
+            # self.latent_placeholder = tf.placeholder_with_default(
+            #     input=tf.zeros([self.batch_size, self.param['dim_latent']], dtype=tf.float32),
+            #     shape=[self.batch_size, self.param['dim_latent']])
 
-        # Set up session
-        print('Setting up session.')
-        self.sess = tf.Session(config=tf.ConfigProto(log_device_placement=False))
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
-        print('Session set up.')
+            # Create network.
+            print('Creating model.')
+            self.net = VAEModel(self.param,
+                                self.batch_size,
+                                self.num_categories,
+                                self.num_classes,
+                                keep_prob=1.0)
+            print('Model created.')
 
-        # Saver for loading checkpoints of the model.
-        self.saver = tf.train.Saver(var_list=tf.trainable_variables())
+            # Create embedding and reconstruction tensors.
+            self.embedding, self.prediction = self.net.embed_and_predict(self.feature_placeholder)
+            # self.reconstruction, _ = self.net.decode(self.latent_placeholder)
 
-        try:
-            self.saved_global_step = load(self.saver, self.sess, self.logdir)
+            # Set up session
+            print('Setting up session.')
+            self.sess = tf.Session(config=tf.ConfigProto(log_device_placement=False))
+            init = tf.global_variables_initializer()
+            self.sess.run(init)
+            print('Session set up.')
 
-        except:
-            print("Something went wrong while restoring checkpoint.")
-            raise
+            # Saver for loading checkpoints of the model.
+            self.saver = tf.train.Saver(var_list=tf.trainable_variables())
 
-        # If a sample library directory is given, generate embeddings for all samples
-        if self.library_dir is not None:
-            self.sample_library = self.build_library()
-        else:
-            self.sample_library = None
+            try:
+                self.saved_global_step = load(self.saver, self.sess, self.logdir)
+
+            except:
+                print("Something went wrong while restoring checkpoint.")
+                raise
+
+            # If a sample library directory is given, generate embeddings for all samples
+            if self.library_dir is not None:
+                self.sample_library = self.build_library()
+            else:
+                self.sample_library = None
 
     # Function that takes audio features and returns their embedding
     def embed(self,
@@ -170,7 +174,6 @@ class SoundSampleTool(object):
         specs_in = np.expand_dims(np.expand_dims(features, axis=0), axis=3)
 
         return specs_in
-
 
     # Function that takes audio sample and returns their embedding
     def embed_audio(self,
