@@ -211,6 +211,8 @@ def return_data(data_list, feature_path, logdir, pad_length=None, normalize=Fals
 
     if randomize:
         randomized_data = randomize_data(data_list)
+    else:
+        randomized_data = data_list
 
     # If desired, load normalisation
     if normalize:
